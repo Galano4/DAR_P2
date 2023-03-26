@@ -26,22 +26,26 @@ public class DronTCP {
         new DronTCP(9999);
     }
 
-    public static String md5(String clear) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        byte[] b = md.digest(clear.getBytes());
-        int size = b.length;
-        StringBuffer h = new StringBuffer(size);
-
-        //algoritmo y arreglo md5
-        for (int i = 0; i < size; i++) {
-            int u = b[i] & 255;
-            if (u < 16) {
-                h.append("0" + Integer.toHexString(u));
-            } else {
-                h.append(Integer.toHexString(u));
-            }
+    public static String md5(String text){
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(DronTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return h.toString();
+        
+        byte[] textbytes = md.digest(text.getBytes());
+        md.update(textbytes);
+        byte[] hashMd5 = md.digest();
+
+        StringBuilder sb = new StringBuilder();
+        
+        for (byte b : hashMd5) {
+            sb.append(String.format("%02x", b));
+        }
+        String hashMd5Texto = sb.toString();
+        
+        return hashMd5Texto;
     }
 
     private DronTCP(int puerto) {
@@ -59,8 +63,6 @@ public class DronTCP {
                 BufferedReader bufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter bufferOut = new PrintWriter(socket.getOutputStream());
 
-                bufferOut.println("Conexión Establecida");
-                bufferOut.flush();
 
                 // Variables
                 int estado = EstadoInicial;
@@ -69,8 +71,6 @@ public class DronTCP {
                 String linea = "";
 
                 while (!finConexion) {
-
-             
 
                     if (LeerMensaje) {
                         linea = bufferIn.readLine();
@@ -82,13 +82,12 @@ public class DronTCP {
 
                             case EstadoInicial:
                                 if (linea.startsWith(Mensajes.login)) {
-                                    bufferOut.println("INIT OK");
+                                    bufferOut.println("INITResp OK");
                                     bufferOut.flush();
                                     estado = Esperandologin;
                                     LeerMensaje = false;
-                                }
-                                else{
-                                    bufferOut.println("INIT Error");
+                                } else {
+                                    bufferOut.println("INITResp Error");
                                     bufferOut.flush();
                                     estado = EstadoInicial;
                                 }
@@ -98,55 +97,80 @@ public class DronTCP {
 
                                 System.out.println("Server: Autenticacion recibida");
                                 String[] vector_login = linea.split("[  ]");
-                                    
-                                System.out.println(vector_login[0]);
+
+                                
                                 if (vector_login.length == 3) {
 
                                     byte[] ByteHash = Base64.getDecoder().decode(vector_login[2]);
                                     String hash_client = new String(ByteHash);
-
-                                    //String hash_server = md5(Mensajes.password);
+                                    System.out.println("Server: Hash codificado: " + vector_login[2]);
                                     
-                                    if ((vector_login[1].equals(Mensajes.user)) && (vector_login[2].equals(Mensajes.password))) {
-                                        bufferOut.println("LOGIN OK. Hola " + vector_login[1]);
+                                    String hash_server = md5(Mensajes.password);
+                                    System.out.println("Server: Hash decodificado: " + hash_server);
+                                    
+                                    if ((vector_login[1].equals(Mensajes.user)) && (hash_client.equals(hash_server))) {
+                                        bufferOut.println("LOGINResp OK");
                                         bufferOut.flush();
-                                        LeerMensaje=true;
+                                        LeerMensaje = true;
                                         estado = EsperandoOrdenes;
+                                        System.out.println("Server: Autenticacion correcta");
                                     } else {
-                                        bufferOut.println("LOGIN WrongPass");
-                                        bufferOut.println("TryAgain");
+                                        bufferOut.println("LOGINResp WrongPass");
                                         bufferOut.flush();
-                                        LeerMensaje=true;
+                                        LeerMensaje = true;
                                         estado = EstadoInicial;
+                                        System.out.println("Server: Autenticacion erronea");
                                     }
                                 } else {
-                                    bufferOut.println("LOGIN BadFormat");
-                                    bufferOut.println("TryAgain");
+                                    bufferOut.println("LOGINResp BadFormat");
                                     bufferOut.flush();
-                                    LeerMensaje=true;
+                                    LeerMensaje = true;
                                     estado = EstadoInicial;
+                                    System.out.println("Server: Autenticacion BadFormat");
 
                                 }
 
                                 break;
 
                             case EsperandoOrdenes:
-                                
-                                
+
+                                if (linea.startsWith(Mensajes.EncM)) {
+                                    bufferOut.println("ORDENResp OK ");
+                                    bufferOut.flush();
+                                    estado = EsperandoOrdenes;
+                                    LeerMensaje = true;
+                                } else 
+                                    if (linea.startsWith(Mensajes.apagar)) {
+                                        bufferOut.println("ORDENResp OK");
+                                        bufferOut.flush();
+                                        estado = EsperandoOrdenes;
+                                        LeerMensaje = false;
+                                        finConexion = true;
+                                    } else {
+                                        bufferOut.println("ORDENResp NOK");
+                                        bufferOut.flush();
+                                        estado = EsperandoOrdenes;
+                                        LeerMensaje = true;
+                                    }
+
+                                break;
 
                         }
 
-                    } else {
+                        }else {
                         System.out.println("Server: error al leer mensaje: ¿conexión interrumpida?");
                         finConexion = true;
                     }
+                    }
+                    System.out.println("Server: Cerrando conexión ... ");
+                    bufferOut.println("BYE");
+                    bufferOut.flush();
+                    socket.close();
                 }
-                socket.close();
-            }
 
-        } catch (IOException ex) {
+            }catch (IOException ex) {
             System.out.println("Server: No se ha podido abrir el servidor en el puerto " + puerto);
         }
 
+        }
     }
-}
