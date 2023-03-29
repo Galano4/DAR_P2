@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Juan Muñoz Villalon
+ * @author Pablo Robles Fuentes, Juan Muñoz Villalon
  */
 public class ClienteDron {
     
