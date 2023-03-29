@@ -163,9 +163,11 @@ public class ClienteDron {
         switch (orden) {
             case "E":
                 clientOut.println("EncenderMotores");
+                Resp = recibirRespuesta();
                 break;
             case "R":
                 clientOut.println("Apagar");
+                Resp = recibirRespuesta();
                 fin=1;
                 break;
             default:
@@ -173,7 +175,7 @@ public class ClienteDron {
                 break;
         }
         
-        Resp = recibirRespuesta();
+        
         
         System.out.println("Server says: "+ Resp);
         
