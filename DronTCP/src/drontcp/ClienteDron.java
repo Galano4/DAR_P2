@@ -44,7 +44,7 @@ public class ClienteDron {
             puerto = Integer.parseInt(args[1]);
         }
         
-        int initCon = IniciarConexion(DirServer,puerto);
+        int initCon = IniciarConexion(DirServer,puerto); //IniciarConexion devuelve o 0 (conex establecida), o 1 o 2
         
         if(initCon==0){
             
@@ -97,7 +97,7 @@ public class ClienteDron {
      
         String mensaje;
         
-        // Como sabesmo que solo va a venir un mensaje, solicitamos caracteres hasta '\n':
+        // Como sabemos que solo va a venir un mensaje, solicitamos caracteres hasta '\n':
         
         try{
             mensaje=clientIn.readLine();
@@ -119,10 +119,11 @@ public class ClienteDron {
         System.out.println("Introduce usuario y contraseña separadas por un espacio: ");
        
         credenciales = conin.nextLine().split("[ ]");
-        pass = credenciales[1];
         usuario = credenciales[0];
+        pass = credenciales[1];
         
-        String hash = DronTCP.md5(pass);
+        
+        String hash = DronTCP.md5(pass); //le hacemos el hash
         byte[] hashBytes = hash.getBytes();
         
         Base64.Encoder encoder = Base64.getEncoder();
@@ -130,7 +131,7 @@ public class ClienteDron {
         
         String hashCodificado = new String(hashBytesCod);
         
-        clientOut.println("HI " + usuario + " " + hashCodificado);
+        clientOut.println("HI "+usuario + " " + hashCodificado);
         clientOut.flush();
         
         
@@ -141,6 +142,8 @@ public class ClienteDron {
             System.out.println("Server says: "+ Resp);
             if (Resp.equals("LOGINResp OK"))
                 error=0;
+            else 
+                error=1;
         }
         else{
             error=1;
@@ -161,19 +164,20 @@ public class ClienteDron {
         switch (orden) {
             case "E":
                 clientOut.println("EncenderMotores");
+                Resp = recibirRespuesta();
+                System.out.println("Server says: "+ Resp);
                 break;
             case "R":
                 clientOut.println("Apagar");
+                Resp = recibirRespuesta();
+                System.out.println("Server says: "+ Resp);
                 fin=1;
                 break;
             default:
                 System.out.println("Orden no valida");
                 break;
         }
-        
-        Resp = recibirRespuesta();
-        
-        System.out.println("Server says: "+ Resp);
+      
         
         return fin;
     }

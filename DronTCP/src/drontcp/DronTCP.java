@@ -107,14 +107,17 @@ public class DronTCP {
                                     
                                     String hash_server = md5(Mensajes.password);
                                     System.out.println("Server: Hash decodificado: " + hash_server);
+                                    System.out.println("Server: Hash decodificado: " + hash_client);
                                     
                                     if ((vector_login[1].equals(Mensajes.user)) && (hash_client.equals(hash_server))) {
+                                        
                                         bufferOut.println("LOGINResp OK");
                                         bufferOut.flush();
                                         LeerMensaje = true;
                                         estado = EsperandoOrdenes;
                                         System.out.println("Server: Autenticacion correcta");
                                     } else {
+                                        System.out.println(vector_login[1]);
                                         bufferOut.println("LOGINResp WrongPass");
                                         bufferOut.flush();
                                         LeerMensaje = true;
