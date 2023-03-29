@@ -165,19 +165,32 @@ public class ClienteDron {
             case "E":
                 clientOut.println("EncenderMotores");
                 Resp = recibirRespuesta();
+<<<<<<< HEAD
                 System.out.println("Server says: "+ Resp);
+=======
+>>>>>>> 21c350397de4d23ce779205e00245b59a68bf52d
                 break;
             case "R":
                 clientOut.println("Apagar");
                 Resp = recibirRespuesta();
+<<<<<<< HEAD
                 System.out.println("Server says: "+ Resp);
+=======
+>>>>>>> 21c350397de4d23ce779205e00245b59a68bf52d
                 fin=1;
                 break;
             default:
                 System.out.println("Orden no valida");
                 break;
         }
+<<<<<<< HEAD
       
+=======
+        
+        
+        
+        System.out.println("Server says: "+ Resp);
+>>>>>>> 21c350397de4d23ce779205e00245b59a68bf52d
         
         return fin;
     }
