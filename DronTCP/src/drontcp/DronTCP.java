@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Juan
+ * @author Pablo Robles Fuentes, Juan Muñoz Villalon
  */
 public class DronTCP {
 
