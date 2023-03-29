@@ -141,6 +141,8 @@ public class ClienteDron {
             System.out.println("Server says: "+ Resp);
             if (Resp.equals("LOGINResp OK"))
                 error=0;
+            else 
+                error=1;
         }
         else{
             error=1;
